@@ -588,7 +588,7 @@ class Server extends Record {
 			$host_alias ?? $this->hostname,
 			$this->port,
 			$jumphosts,
-			'keys-sync',
+			$this->keys_sync_user,
 			'config/keys-sync.pub',
 			'config/keys-sync',
 			$this->host_key
