@@ -614,7 +614,7 @@ class Server extends Record {
 				} catch(SSHException $e) {
 					if($config['security']['hostname_verification'] >= 3) {
 						// 3+ = Abort if file does not exist
-						throw new SSHException("Could not read /var/local/keys-sync/.hostnames", null, $e);
+						throw new SSHException("Could not read /var/local/keys-sync/.hostnames", 0, $e);
 					} else {
 						$allowed_hostnames = null;
 					}
