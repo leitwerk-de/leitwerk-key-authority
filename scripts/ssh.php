@@ -225,4 +225,17 @@ class SSH {
 			throw new SSHException("Could not unlink file $filename");
 		}
 	}
+
+		/**
+	 * Get the server identifier from the given connection object.
+	 *
+	 * @return string $prop value from server identifier
+	 */
+	public function getServerIdentifier(): string {
+		$reflection = new \ReflectionClass($this->connection);
+		$property = $reflection->getProperty('server_identifier');
+		$property->setAccessible(true);
+		return $property->getValue($this->connection);
+	}
+
 }
