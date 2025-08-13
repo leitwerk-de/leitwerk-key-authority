@@ -275,8 +275,7 @@ function sync_server($id, $only_username = null, $preview = false) {
 	$server_identifier = $connection->getServerIdentifier();
 
 	// if server is windows server we use different dirs and commands
-	$win_strings  = ['win', 'windows'];
-	if (array_filter($win_strings, fn($n) => stripos($server_identifier, $n) !== false)) {
+	if (stripos($server_identifier, "win") !== false) {
 		$keydir = $config['general']['windows_keys_sync_dir'] ?? 'C:\\ProgramData\\ssh\\keys_sync\\';
 	}
 
