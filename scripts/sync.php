@@ -274,22 +274,34 @@ function sync_server($id, $only_username = null, $preview = false) {
 	// first check type of server
 	$server_identifier = $connection->getServerIdentifier();
 
-	// if server is windows server we use different dirs and commands
+	// if connecting to windows we use a different keys-sync dir and powershell commands instead of unix commands
 	if (stripos($server_identifier, "win") !== false) {
 		$keydir = $config['general']['windows_keys_sync_dir'] ?? '/ProgramData/ssh/keys-sync';
+		$sha1sum_command ='Get-ChildItem -Path '.escapeshellarg($keydir).' -File | ForEach-Object { $hash = Get-FileHash $_.FullName -Algorithm SHA1 ;"$($hash.Hash)  $($_.FullName)" }';
 	}
 	else{
 		$keydir = $config['general']['linux_keys_sync_dir'] ?? '/var/local/keys-sync';
+		$sha1sum_command = '/usr/bin/sha1sum '.escapeshellarg($keydir).'/*';
 	}
 
-	$output = $connection->exec('/usr/bin/sha1sum '.escapeshellarg($keydir).'/*');
+	$output = $connection->exec($sha1sum_command);
 	$entries = explode("\n", $output);
+
 	$sha1sums = array();
-	foreach($entries as $entry) {
-		if(preg_match('|^([0-9a-f]{40})  '.preg_quote($keydir, '|').'/(.*)$|', $entry, $matches)) {
-			$sha1sums[$matches[2]] = $matches[1];
+	foreach ($entries as $entry) {
+
+		$line = trim($entry);
+		$line = str_replace('\\', '/', $line);
+
+		if (preg_match(
+			'#^([0-9a-f]{40})\s+.+?/keys-sync/([^/]+)$#i',
+			$line,
+			$matches
+		)) {
+			$sha1sums[$matches[2]] = strtolower($matches[1]);
 		}
 	}
+
 	foreach($keyfiles as $username => $keyfile) {
 		if(is_null($only_username) || $username == $only_username) {
 			if(isset($sha1sums[$username])) {
