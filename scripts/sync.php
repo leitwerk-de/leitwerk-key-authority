@@ -276,11 +276,10 @@ function sync_server($id, $only_username = null, $preview = false) {
 
 	// if server is windows server we use different dirs and commands
 	if (stripos($server_identifier, "win") !== false) {
-		$keydir = $config['general']['windows_keys_sync_dir'] ?? 'C:\\ProgramData\\ssh\\keys_sync\\';
+		$keydir = $config['general']['windows_keys_sync_dir'] ?? '/ProgramData/ssh/keys-sync';
 	}
-
 	else{
-		$keydir = $config['general']['linux_keys_sync_dir'] ?? '/var/local/keys-sync/';
+		$keydir = $config['general']['linux_keys_sync_dir'] ?? '/var/local/keys-sync';
 	}
 
 	$output = $connection->exec('/usr/bin/sha1sum '.escapeshellarg($keydir).'/*');
@@ -297,7 +296,7 @@ function sync_server($id, $only_username = null, $preview = false) {
 				unset($sha1sums[$username]);
 			}
 			try {
-				$remote_filename = "$keydir$username";
+				$remote_filename = "$keydir/$username";
 				$create = true;
 				if($keyfile['check']) {
 					$output = $connection->exec('id '.escapeshellarg($username));
