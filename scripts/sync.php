@@ -278,10 +278,14 @@ function sync_server($id, $only_username = null, $preview = false) {
 	if (stripos($server_identifier, "win") !== false) {
 		$keydir = $config['general']['windows_keys_sync_dir'] ?? '/ProgramData/ssh/keys-sync';
 		$sha1sum_command ='Get-ChildItem -Path '.escapeshellarg($keydir).' -File | ForEach-Object { $hash = Get-FileHash $_.FullName -Algorithm SHA1 ;"$($hash.Hash)  $($_.FullName)" }';
+		// USER will be replaced when running the command
+		$user_exists_command = 'Get-CimInstance -ClassName Win32_UserProfile | Where-Object { $_.LocalPath.Split("\\")[-1] -eq USER }';
 	}
 	else{
 		$keydir = $config['general']['linux_keys_sync_dir'] ?? '/var/local/keys-sync';
 		$sha1sum_command = '/usr/bin/sha1sum '.escapeshellarg($keydir).'/*';
+		// USER will be replaced when running the command
+		$user_exists_command = 'id USER';
 	}
 
 	$output = $connection->exec($sha1sum_command);
@@ -293,11 +297,7 @@ function sync_server($id, $only_username = null, $preview = false) {
 		$line = trim($entry);
 		$line = str_replace('\\', '/', $line);
 
-		if (preg_match(
-			'#^([0-9a-f]{40})\s+.+?/keys-sync/([^/]+)$#i',
-			$line,
-			$matches
-		)) {
+		if (preg_match('#^([0-9a-f]{40})\s+.+?/keys-sync/([^/]+)$#i', $line, $matches)) {
 			$sha1sums[$matches[2]] = strtolower($matches[1]);
 		}
 	}
@@ -311,7 +311,7 @@ function sync_server($id, $only_username = null, $preview = false) {
 				$remote_filename = "$keydir/$username";
 				$create = true;
 				if($keyfile['check']) {
-					$output = $connection->exec('id '.escapeshellarg($username));
+					$output = $connection->exec(str_replace("USER", escapeshellarg($username), $user_exists_command));
 					if(empty($output)) $create = false;
 				}
 				if($create) {
@@ -319,6 +319,7 @@ function sync_server($id, $only_username = null, $preview = false) {
 						echo date('c')." {$hostname}: No changes required for {$username}\n";
 					} else {
 						$connection->file_put_contents($remote_filename, $keyfile['keyfile']);
+						//system owned keyfiles work fine on windows, so we just let this fail quietly
 						$connection->exec('chown keys-sync: '.escapeshellarg($remote_filename));
 						echo date('c')." {$hostname}: Updated {$username}\n";
 					}
@@ -361,7 +362,7 @@ function sync_server($id, $only_username = null, $preview = false) {
 		$server->uuid = $uuid;
 		$server->update();
 	} catch(SSHException $e) {
-		// If the /etc/uuid file does not exist, silently ignore
+		// If the /etc/uuid file does not exist, silently ignore - fully ignored on windows as well
 	}
 	$failure_occurred = false;
 	if($cleanup_errors > 0) {

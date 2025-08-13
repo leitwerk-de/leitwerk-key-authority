@@ -621,7 +621,15 @@ class Server extends Record {
 				}
 			}
 			if(is_null($allowed_hostnames)) {
-				$output = $connection->exec('/bin/hostname -f');
+				// differentiate hostname checking based on os
+				$server_identifier = $connection->getServerIdentifier();
+				if (stripos($server_identifier, "win") !== false) {
+					$hostname_command = ('[System.Net.Dns]::GetHostByName($env:COMPUTERNAME).HostName');
+				}
+				else {
+					$hostname_command = ('/bin/hostname -f');
+				}
+				$output = $connection->exec($hostname_command);
 				$allowed_hostnames = array(trim($output));
 			}
 			if(!in_array($this->hostname, $allowed_hostnames)) {
