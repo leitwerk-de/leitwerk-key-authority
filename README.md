@@ -88,12 +88,12 @@ Key distribution
 
 Leitwerk Key Authority distributes authorized keys to your servers via SSH. It does this by:
 
-1.  Connecting to the server with SSH, authorizing as the `keys-sync` user.
-2.  Writing the appropriate authorized keys to named user files in `/var/local/keys-sync/` (eg. all authorized keys for the root user will be written to `/var/local/keys-sync/root`).
+1.  Connecting to the server with SSH, authorizing as the keys-sync-user defined per server(default:`keys-sync`).
+2.  Writing the appropriate authorized keys to named user files in `/var/local/keys-sync/` for linux and `/ProgramData/ssh/keys-sync/` for windows (eg. all authorized keys for the root user will be written to `/var/local/keys-sync/root`).
 
-This means that your SSH installation will need to be reconfigured to read authorized keys from `/var/local/keys-sync/`.
+This means that your SSH installation will need to be reconfigured to read authorized keys from the given ssh keys dir.
 
-Please note that doing so will deny access to any existing SSH public key authorized in the default `~/.ssh` directories.
+Please note that doing so can deny access to any existing SSH public key authorized in the default `~/.ssh` directories.
 
 Under OpenSSH, the configuration changes needed are:
 
@@ -102,7 +102,12 @@ Under OpenSSH, the configuration changes needed are:
 
 StrictModes must be disabled because the files will all be owned by the keys-sync user.
 
+Alternatively existing user authorized keys can be used by setting the config file like this:
+
+    AuthorizedKeysFile /var/local/keys-sync/%u .ssh/authorized_keys
+
 The file `/var/local/keys-sync/keys-sync` must exist, with the same contents as the `config/keys-sync.pub` file in order for the synchronization daemon to authenticate.
+These keys will be used by the defined keys-sync-user regardless of if its name is actually keys-sync.
 
 Screenshots
 -----------
