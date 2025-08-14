@@ -226,7 +226,7 @@ class SSH {
 		}
 	}
 
-		/**
+	/**
 	 * Get the server identifier from the given connection object.
 	 *
 	 * @return string $prop value from server identifier
