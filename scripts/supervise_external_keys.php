@@ -155,15 +155,29 @@ function parse_user_entry(string $line) {
 function read_server_keys(Server $server, string &$error_string, SSH $connection, $keys_in_db_assoc) {
 	global $server_dir;
 
+	$server_identifier = $connection->getServerIdentifier();
 	if ($server->key_scan == 'off' || !external_keys_active($connection)) {
 		return [];
 	}
-	$user_entries = $connection->file_get_lines("/etc/passwd");
-	$user_entries = array_map('parse_user_entry', $user_entries);
-	$user_entries = array_filter($user_entries, function($entry) {
-		return $entry['active'];
-	});
 
+	if (stripos($server_identifier, "win") !== false) {
+		$user_profiles = $connection->exec('Get-ChildItem /Users | ForEach-Object { $_.Name }');
+		$users = preg_split('/\r\n|\r|\n/', trim($user_profiles));
+		$user_entries = array_map(function($user) {
+			return [
+				'user'   => $user,
+				'home'   => '/Users/' . $user,
+				'active' => true
+			];
+		}, $users);
+	}
+	else{
+		$user_entries = $connection->file_get_lines("/etc/passwd");
+		$user_entries = array_map('parse_user_entry', $user_entries);
+		$user_entries = array_filter($user_entries, function($entry) {
+			return $entry['active'];
+		});
+	}
 	$keys = [];
 	try {
 		foreach ($user_entries as $user) {
@@ -189,9 +203,7 @@ function read_server_keys(Server $server, string &$error_string, SSH $connection
  * @return bool true if they are active (users can login using keys in authorized_keys), false if they are ignored
  */
 function external_keys_active($connection) {
-	// first check type of server
-	$server_identifier = $connection->getServerIdentifier();
-	if (stripos($server_identifier, "win") !== false) {
+	if (stripos($connection->server_identifier, "win") !== false) {
 		$sshd_config_file = '/ProgramData/ssh/sshd_config';
 	}
 	else{
@@ -228,10 +240,20 @@ function add_entries(array &$entries, string $user, SSH $ssh, string $filename, 
 	// Use the 'test' shell command to check for writability.
 	// The php function is_writable() produces wrong results when using facl.
 	$shell_escaped_filename = escapeshellarg($filename);
-	$output = $ssh->exec("test -w {$shell_escaped_filename}; echo $?");
-	if ($output !== "0\n") {
-		$error_string .= "The file {$filename} is not writable for the keys-sync user. This will prevent key authority from removing old keys.\n";
+
+	if (stripos($ssh->server_identifier, "win") !== false) {
+		$output = $ssh->exec('try { [System.IO.File]::OpenWrite($filePath).Close(); Write-Output "File is writable." } catch { Write-Output "File is not writable."};');
+		if ($output == "File is not writable.") {
+			$error_string .= "The file {$filename} is not writable for the keys-sync user. This will prevent key authority from removing old keys.\n";
+		}
 	}
+	else{
+		$output = $ssh->exec("test -w {$shell_escaped_filename}; echo $?");
+		if ($output !== "0\n") {
+			$error_string .= "The file {$filename} is not writable for the keys-sync user. This will prevent key authority from removing old keys.\n";
+		}
+	}
+
 	$file_modified = false;
 	$new_filecontent = '';
 	$line_num = 1;
