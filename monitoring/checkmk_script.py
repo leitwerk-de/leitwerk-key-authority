@@ -20,6 +20,7 @@ import calendar
 import email.utils
 import json
 import time
+import os
 
 
 def oneline(s: str):
@@ -80,7 +81,10 @@ def check_content(status_filename: str):
 
 
 def main():
-    status_filename = "/var/local/keys-sync.status"
+    if os.name == "nt":
+        status_filename = "/ProgramData/ssh/keys-sync.status"
+    else:
+        status_filename = "/var/local/keys-sync.status"
 
     try:
         status, info = check_content(status_filename)
