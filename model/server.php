@@ -728,8 +728,15 @@ class Server extends Record {
 			"expire" => $expire,
 		];
 
+		$server_identifier = $connection->getServerIdentifier();
+		if (stripos($server_identifier, "win") !== false) {
+			$keydir = $config['monitoring']['windows_status_file_path'] ?? '/ProgramData/ssh/keys-sync.status';
+		}
+		else {
+			$filename = $config['monitoring']['linux_status_file_path'] ?? '/var/local/keys-sync.status';
+		}
 		$file_content = json_encode($status_content);
-		$filename = $config['monitoring']['status_file_path'] ?? '/var/local/keys-sync.status';
+
 		try {
 			$connection->file_put_contents($filename, $file_content);
 		} catch (SSHException $e) {

@@ -15,22 +15,21 @@
 ## limitations under the License.
 ##
 
+from typing import Any
 import calendar
-import datetime
 import email.utils
 import json
-import re
 import time
 
-status_filename = "/var/local/keys-sync.status"
 
-def oneline(s):
+def oneline(s: str):
     lines = s.split("\n")
     if len(lines) > 0 and lines[-1] == "":
         lines = lines[:-1]
     return " / ".join(lines)
 
-def collect_errors(status_info):
+
+def collect_errors(status_info: dict[str, Any]):
     OK = 0
     WARN = 1
 
@@ -38,7 +37,7 @@ def collect_errors(status_info):
     errors = []
 
     if SCRIPT_VERSION < status_info["warn_below_version"]:
-        errors += [(WARN, "This checkscript (version " + str(SCRIPT_VERSION) + ") is outdated. Please update the script on the affected machine.")]
+        errors += [(WARN, f"This checkscript (version {SCRIPT_VERSION}) is outdated. Please update the script on the affected machine.")]
 
     if status_info["sync_status"] != "sync success":
         if status_info["sync_status_message"] is None:
@@ -65,7 +64,8 @@ def collect_errors(status_info):
 
     return errors
 
-def check_content(status_filename):
+
+def check_content(status_filename: str):
     with open(status_filename, "r") as f:
         content = json.load(f)
     errors = collect_errors(content)
@@ -78,10 +78,18 @@ def check_content(status_filename):
 
     return final_state, "; ".join([e[1] for e in errors])
 
-try:
-    status, info = check_content(status_filename)
-except BaseException as e:
-    status = 1
-    info = "Check script failed to execute: " + oneline(str(e))
 
-print(str(status) + " keys_sync_status - " + info)
+def main():
+    status_filename = "/var/local/keys-sync.status"
+
+    try:
+        status, info = check_content(status_filename)
+    except BaseException as e:
+        status = 1
+        info = "Check script failed to execute: " + oneline(str(e))
+
+    print(f"{status} keys_sync_status - {info}")
+
+
+if __name__ == "__main__":
+    main()

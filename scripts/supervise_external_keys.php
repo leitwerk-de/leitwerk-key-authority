@@ -189,7 +189,15 @@ function read_server_keys(Server $server, string &$error_string, SSH $connection
  * @return bool true if they are active (users can login using keys in authorized_keys), false if they are ignored
  */
 function external_keys_active($connection) {
-	$config_lines = $connection->file_get_lines("/etc/ssh/sshd_config");
+	// first check type of server
+	$server_identifier = $connection->getServerIdentifier();
+	if (stripos($server_identifier, "win") !== false) {
+		$sshd_config_file = '/ProgramData/ssh/sshd_config';
+	}
+	else{
+		$sshd_config_file = "/etc/ssh/sshd_config";
+	}
+	$config_lines = $connection->file_get_lines($sshd_config_file);
 	foreach ($config_lines as $line) {
 		if (strpos(strtolower($line), "authorizedkeysfile") === 0) {
 			return strpos($line, ".ssh/authorized_keys") !== false;
