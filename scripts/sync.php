@@ -271,20 +271,15 @@ function sync_server($id, $only_username = null, $preview = false) {
 
 	// Sync
 
-	// first check type of server
 	$server_identifier = $connection->getServerIdentifier();
-
-	// if connecting to windows we use a different keys-sync dir and powershell commands instead of unix commands
 	if (stripos($server_identifier, "win") !== false) {
 		$keydir = $config['general']['windows_keys_sync_dir'] ?? '/ProgramData/ssh/keys-sync';
 		$sha1sum_command ='Get-ChildItem -Path '.escapeshellarg($keydir).' -File | ForEach-Object { $hash = Get-FileHash $_.FullName -Algorithm SHA1 ;"$($hash.Hash)  $($_.FullName)" }';
-		// USER will be replaced when running the command
-		$user_exists_command = 'Get-CimInstance -ClassName Win32_UserProfile | Where-Object { $_.LocalPath.Split("\\")[-1] -eq USER }';
+		$user_exists_command = 'Get-ChildItem /Users | Where-Object { $_.Name -like "USER" }';
 	}
 	else{
 		$keydir = $config['general']['linux_keys_sync_dir'] ?? '/var/local/keys-sync';
 		$sha1sum_command = '/usr/bin/sha1sum '.escapeshellarg($keydir).'/*';
-		// USER will be replaced when running the command
 		$user_exists_command = 'id USER';
 	}
 
