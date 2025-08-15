@@ -39,7 +39,8 @@ foreach ($servers as $server) {
 		echo date('c')." Reading external ssh keys from {$server->hostname}\n";
 
 		$ssh = $server->connect_ssh();
-		$keys[$server->id] = read_server_keys($server, $error_string, $ssh, $keys_in_db_assoc);
+		$server_identifier = $ssh->getServerIdentifier();
+		$keys[$server->id] = read_server_keys($server, $error_string, $ssh, $keys_in_db_assoc, $server_identifier);
 		if ($error_string == "") {
 			// Empty error set is stored as null in database
 			$error_string = null;
@@ -152,11 +153,10 @@ function parse_user_entry(string $line) {
  * @param array $keys_in_db_assoc Known keys, used to check if some keys need to be removed
  * @return array of ssh keys that are active on this server
  */
-function read_server_keys(Server $server, string &$error_string, SSH $connection, $keys_in_db_assoc) {
+function read_server_keys(Server $server, string &$error_string, SSH $connection, $keys_in_db_assoc, $server_identifier) {
 	global $server_dir;
 
-	$server_identifier = $connection->getServerIdentifier();
-	if ($server->key_scan == 'off' || !external_keys_active($connection)) {
+	if ($server->key_scan == 'off' || !external_keys_active($connection, $server_identifier)) {
 		return [];
 	}
 
@@ -183,9 +183,9 @@ function read_server_keys(Server $server, string &$error_string, SSH $connection
 		foreach ($user_entries as $user) {
 			if ($server->key_scan == 'full' || $user['user'] == 'root') {
 				$path = "{$user['home']}/.ssh/authorized_keys";
-				add_entries($keys, $user['user'], $connection, $path, $error_string, $keys_in_db_assoc);
+				add_entries($keys, $user['user'], $connection, $path, $error_string, $keys_in_db_assoc, $server_identifier);
 				$path .= '2';
-				add_entries($keys, $user['user'], $connection, $path, $error_string, $keys_in_db_assoc);
+				add_entries($keys, $user['user'], $connection, $path, $error_string, $keys_in_db_assoc, $server_identifier);
 			}
 		}
 	} catch (Exception $e) {
@@ -202,8 +202,8 @@ function read_server_keys(Server $server, string &$error_string, SSH $connection
  * @param SSH $connection SSH connection instance to the server
  * @return bool true if they are active (users can login using keys in authorized_keys), false if they are ignored
  */
-function external_keys_active($connection) {
-	if (stripos($connection->server_identifier, "win") !== false) {
+function external_keys_active($connection, $server_identifier) {
+	if (stripos($server_identifier, "win") !== false) {
 		$sshd_config_file = '/ProgramData/ssh/sshd_config';
 	}
 	else{
@@ -230,18 +230,18 @@ function external_keys_active($connection) {
  * @param string &$error_string Reference to a string variable where error messages are appended
  * @param array $keys_in_db_assoc Known keys, used to check if some keys need to be removed
  */
-function add_entries(array &$entries, string $user, SSH $ssh, string $filename, string &$error_string, $keys_in_db_assoc) {
+function add_entries(array &$entries, string $user, SSH $ssh, string $filename, string &$error_string, $keys_in_db_assoc, $server_identifier) {
 	try {
 		$lines = $ssh->file_get_lines($filename);
 	} catch (SSHException $e) {
-		check_missing_file($ssh, $filename, $error_string);
+		check_missing_file($ssh, $filename, $error_string, $server_identifier);
 		return;
 	}
 	// Use the 'test' shell command to check for writability.
 	// The php function is_writable() produces wrong results when using facl.
 	$shell_escaped_filename = escapeshellarg($filename);
 
-	if (stripos($ssh->server_identifier, "win") !== false) {
+	if (stripos($server_identifier, "win") !== false) {
 		$output = $ssh->exec('try { [System.IO.File]::OpenWrite($filePath).Close(); Write-Output "File is writable." } catch { Write-Output "File is not writable."};');
 		if ($output == "File is not writable.") {
 			$error_string .= "The file {$filename} is not writable for the keys-sync user. This will prevent key authority from removing old keys.\n";
@@ -303,10 +303,15 @@ function add_entries(array &$entries, string $user, SSH $ssh, string $filename, 
  * @param string $filename Name of the authorized_keys file to scan
  * @param string &$error_string Reference to a string variable where error messages are appended
  */
-function check_missing_file(SSH $ssh, string $filename, string &$error_string) {
+function check_missing_file(SSH $ssh, string $filename, string &$error_string, $server_identifier) {
 	try {
 		$escaped_filename = escapeshellarg($filename);
-		$stderr_output = $ssh->exec("LANG=en_US.UTF-8 head -c 0 $escaped_filename 2>&1");
+		if (stripos($server_identifier, "win") !== false) {
+			$stderr_output = $ssh->exec("type $escaped_filename > null");
+		}
+		else{
+			$stderr_output = $ssh->exec("LANG=en_US.UTF-8 head -c 0 $escaped_filename 2>&1");
+		}
 		if (preg_match("%: ([^:]+)\n\$%", $stderr_output, $matches)) {
 			$err = $matches[1];
 			if ($err !== "No such file or directory") {

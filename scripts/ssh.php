@@ -30,7 +30,6 @@ class SSH {
 	 * The ssh connection handle, instance of phpseclib3\Net\SFTP. Must be set by the constructor.
 	 */
 	private $connection;
-	public $server_identifier;
 	/**
 	 * Child command handle.
 	 * Event though this field is never read, it needs to be stored here to keep the child
@@ -51,7 +50,6 @@ class SSH {
 	 */
 	private function __construct($connection) {
 		$this->connection = $connection;
-		$this->server_identifier = $connection->getServerIdentifier();
 	}
 
 	/**
