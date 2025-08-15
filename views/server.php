@@ -91,6 +91,7 @@ if(isset($_POST['sync'])) {
 } elseif(isset($_POST['edit_server']) && $active_user->admin) {
 	$hostname = trim($_POST['hostname']);
 	$jumphosts = trim($_POST['jumphosts']);
+	$keys_sync_user = trim($_POST['keys_sync_user']);
 	if(!Server::hostname_valid($hostname)) {
 		$content = new PageSection('invalid_hostname');
 		$content->set('hostname', $hostname);
@@ -118,6 +119,7 @@ if(isset($_POST['sync'])) {
 		$server->port = $_POST['port'];
 		if($_POST['host_key'] == '') $server->host_key = null;
 		$server->jumphosts = $jumphosts;
+		$server->keys_sync_user = $keys_sync_user;
 		$server->key_management = $_POST['key_management'];
 		$server->authorization = $_POST['authorization'];
 		$server->key_scan = $_POST['key_scan'];

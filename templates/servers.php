@@ -214,6 +214,10 @@
 					<?php } ?>
 				</datalist>
 			</div>
+			<div class="form-group">
+				<label for="keys_sync_user">User for keys-sync</label>
+				<input type="text" id="keys_sync_user" name="keys_sync_user" class="form-control" value="keys-sync" required>
+			</div>
 			<button type="submit" name="add_server" value="1" class="btn btn-primary">Add server to key management</button>
 		</form>
 	</div>
@@ -226,15 +230,17 @@
 		<p>The csv content must consist of 4 columns and not contain a headline.</p>
 		<p>Columns:</p>
 		<ol>
-			<li>The dns name of the server</li>
-			<li>The port number (optional, if empty 22 is assumed)</li>
-			<li>A list of jumphosts (optional, may be empty) see <a href="<?php outurl('/help#jumphost_format')?>">format specification</a></li>
+			<li>The dns name of the server.</li>
+			<li>The port number (optional, if empty 22 is assumed).</li>
+			<li>A list of jumphosts (optional, may be empty) see <a href="<?php outurl('/help#jumphost_format')?>">format specification.</a></li>
 			<li>A semicolon-separated list of leader login names and leader group names. At least one leader or leader group is needed per server.</li>
+			<li>The keys-sync user used for syncing keys to the server. Needs to be an existing user on the server.</li>
 		</ol>
 		<h4>Example</h4>
 		<pre>host1.example.com,,"root@j1.example.com:7022,keys-sync@j2.example.com",leader1
 host2.example.com,2222,,leader1;ld_group4
-host3.example.com,22,,ld_group4;leader2</pre>
+host3.example.com,22,,ld_group4;leader2,keys-sync
+host4.example.com,22,,leader1,svc_automation</pre>
 		<form method="post" action="<?php outurl($this->data->relative_request_url)?>">
 			<?php out($this->get('active_user')->get_csrf_field(), ESC_NONE) ?>
 			<div class="form-group">

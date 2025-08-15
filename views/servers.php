@@ -38,8 +38,8 @@ function prepare_import(string $csv_document, &$error_ref): ?array {
 		}
 		$cells = str_getcsv($line, ",", "\"", "");
 		$count = count($cells);
-		if ($count != 4) {
-			$errors .= "- Line $line_num contains $count columns, but expected 4\n";
+		if ($count != 4 or $count != 5) {
+			$errors .= "- Line $line_num contains $count columns, but expected 4 or 5\n";
 			continue;
 		}
 		$hostname = $cells[0];
@@ -80,11 +80,18 @@ function prepare_import(string $csv_document, &$error_ref): ?array {
 				$errors .= "- Leader in line $line_num: \"$name\" could not be found, neither as user nor as group.\n";
 			}
 		}
+		if ($cells[4] === "") {
+			$keys_sync_user = "keys-sync";
+		}
+		else {
+			$keys_sync_user = $cells[4];
+		}
 		$entries[] = [
 			"hostname" => $hostname,
 			"port" => $port,
 			"jumphosts" => $jumphosts,
 			"admins" => $admins,
+			"keys_sync_user" => $keys_sync_user,
 		];
 	}
 	$error_ref = $errors;
@@ -149,6 +156,7 @@ function run_import(array $entries): array {
 		$server->port = $entry['port'];
 		$server->key_scan = default_key_scan_setting();
 		$server->jumphosts = $entry['jumphosts'];
+		$server->keys_sync_user = $entry['keys_sync_user'];
 		try {
 			$server_dir->add_server($server);
 			foreach($entry['admins'] as $admin) {
@@ -187,6 +195,7 @@ if(isset($_POST['add_server'])) {
 			$server->port = $_POST['port'];
 			$server->key_scan = default_key_scan_setting();
 			$server->jumphosts = $_POST['jumphosts'];
+			$server->keys_sync_user = $_POST['keys_sync_user'];
 			try {
 				$server_dir->add_server($server);
 				foreach($admins as $admin) {

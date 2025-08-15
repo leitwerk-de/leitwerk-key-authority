@@ -291,6 +291,12 @@
 				</div>
 			</div>
 			<div class="form-group">
+				<label for="host_key" class="col-sm-2 control-label">User for keys-sync</label>
+				<div class="col-sm-10">
+					<input type="text" id="keys_sync_user" name="keys_sync_user" value="<?php out($this->get('server')->keys_sync_user)?>" required class="form-control">
+				</div>
+			</div>
+			<div class="form-group">
 				<label class="col-sm-2 control-label">Key management</label>
 				<div class="col-sm-10">
 					<div class="radio">

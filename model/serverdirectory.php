@@ -31,12 +31,13 @@ class ServerDirectory extends DBDirectory {
 		$port = $server->port;
 		$key_scan = $server->key_scan;
 		$jumphosts = $server->jumphosts;
+		$keys_sync_user = $server->keys_sync_user;
 		if (! Server::jumphosts_valid($jumphosts)) {
 			throw new InvalidJumphostsException();
 		}
 		try {
-			$stmt = $this->database->prepare("INSERT INTO server SET hostname = ?, port = ?, key_scan = ?, jumphosts = ?");
-			$stmt->bind_param('sdss', $hostname, $port, $key_scan, $jumphosts);
+			$stmt = $this->database->prepare("INSERT INTO server SET hostname = ?, port = ?, key_scan = ?, jumphosts = ?, keys_sync_user = ?");
+			$stmt->bind_param('sdsss', $hostname, $port, $key_scan, $jumphosts, $keys_sync_user);
 			$stmt->execute();
 			$server->id = $stmt->insert_id;
 			$stmt->close();
