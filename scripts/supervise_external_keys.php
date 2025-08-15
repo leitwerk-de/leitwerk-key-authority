@@ -161,7 +161,9 @@ function read_server_keys(Server $server, string &$error_string, SSH $connection
 	}
 
 	if (stripos($server_identifier, "win") !== false) {
-		$user_profiles = $connection->exec('Get-ChildItem /Users | ForEach-Object { $_.Name }');
+		// check for "enabled" users - instead of checking local or AD enabled status
+		$user_profiles = $connection->exec('Get-ChildItem /Users -Directory | Where-Object {Test-Path -Path (Join-Path $_.FullName ".ssh\authorized_keys")} | ForEach-Object {$_.Name}');
+
 		$users = preg_split('/\r\n|\r|\n/', trim($user_profiles));
 		$user_entries = array_map(function($user) {
 			return [
@@ -242,16 +244,13 @@ function add_entries(array &$entries, string $user, SSH $ssh, string $filename, 
 	$shell_escaped_filename = escapeshellarg($filename);
 
 	if (stripos($server_identifier, "win") !== false) {
-		$output = $ssh->exec('try { [System.IO.File]::OpenWrite($filePath).Close(); Write-Output "File is writable." } catch { Write-Output "File is not writable."};');
-		if ($output == "File is not writable.") {
-			$error_string .= "The file {$filename} is not writable for the keys-sync user. This will prevent key authority from removing old keys.\n";
-		}
+		$output = $ssh->exec("try {[System.IO.File]::OpenWrite($shell_escaped_filename).Close(); Write-Output '0\n'} catch { Write-Output 'File is not writable.'};");
 	}
 	else{
 		$output = $ssh->exec("test -w {$shell_escaped_filename}; echo $?");
-		if ($output !== "0\n") {
-			$error_string .= "The file {$filename} is not writable for the keys-sync user. This will prevent key authority from removing old keys.\n";
-		}
+	}
+	if ($output !== "0\n") {
+		$error_string .= "The file {$filename} is not writable for the keys-sync user. This will prevent key authority from removing old keys.\n";
 	}
 
 	$file_modified = false;
@@ -307,19 +306,22 @@ function check_missing_file(SSH $ssh, string $filename, string &$error_string, $
 	try {
 		$escaped_filename = escapeshellarg($filename);
 		if (stripos($server_identifier, "win") !== false) {
-			$stderr_output = $ssh->exec("type $escaped_filename > null");
+			$stderr_output = $ssh->exec("try {[System.IO.File]::Open($escaped_filename, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read).Close();} catch {Write-Output 'File cannot be read or does not exist.'}");
 		}
 		else{
 			$stderr_output = $ssh->exec("LANG=en_US.UTF-8 head -c 0 $escaped_filename 2>&1");
 		}
+
 		if (preg_match("%: ([^:]+)\n\$%", $stderr_output, $matches)) {
 			$err = $matches[1];
 			if ($err !== "No such file or directory") {
 				$error_string .= "Could not read $filename: $err\n";
 			}
-		} else if ($stderr_output === "") {
+		}
+		else if ($stderr_output === "") {
 			$error_string .= "Failed to check if $filename exists: Got no error message\n";
-		} else {
+		}
+		else {
 			$error_string .= "Failed to check if $filename exists: $stderr_output";
 		}
 	} catch (SSHException $e) {
