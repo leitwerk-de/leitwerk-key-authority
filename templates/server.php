@@ -141,9 +141,7 @@
 						<?php } ?>
 						<td rowspan="<?php out(max(1, count($access_list)))?>">
 							<a href="<?php outurl($this->data->relative_request_url.'/accounts/'.urlencode($account->name))?>" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-cog"></span> Manage account</a>
-							<?php if(!array_key_exists($account->name, $this->get('default_accounts'))) { ?>
 							<button type="submit" name="delete_account" value="<?php out($account->id) ?>" class="btn btn-default btn-xs" data-confirm="Are you sure you want to delete this account?"><span class="glyphicon glyphicon-trash"></span> Delete account</button>
-							<?php } ?>
 							<!--<button class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus"></span> Grant user access</button>-->
 						</td>
 						<?php if(empty($access_list)) { ?>
