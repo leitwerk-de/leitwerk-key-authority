@@ -23,10 +23,11 @@ class ServerDirectory extends DBDirectory {
 	/**
 	* Create the new server in the database.
 	* @param Server $server object to add
+	* @param string $default_root_accounts to allow dynamic setting of config[defaults][account_groups]
 	* @throws ServerAlreadyExistsException if a server with that hostname already exists
 	* @throws InvalidJumphostsException If the list of jumphosts is syntactically incorrect
 	*/
-	public function add_server(Server $server) {
+	public function add_server(Server $server, string $default_root_accounts) {
 		$hostname = $server->hostname;
 		$port = $server->port;
 		$key_scan = $server->key_scan;
@@ -42,7 +43,7 @@ class ServerDirectory extends DBDirectory {
 			$server->id = $stmt->insert_id;
 			$stmt->close();
 			$server->log(array('action' => 'Server add'));
-			$server->add_standard_accounts();
+			$server->add_standard_accounts($default_root_accounts);
 			$server->sync_access();
 		} catch(mysqli_sql_exception $e) {
 			if($e->getCode() == 1062) {

@@ -287,19 +287,51 @@ class Server extends Record {
 	/**
 	* Create any standard accounts that should exist on every server, and add them to the related
 	* groups.
+	* @param string $default_root_accounts to define standard account creation behaviour
 	*/
-	public function add_standard_accounts() {
+	public function add_standard_accounts(string $default_root_accounts): void {
 		global $group_dir, $config;
-		if(!isset($config['defaults']['account_groups'])) return;
-		foreach($config['defaults']['account_groups'] as $account_name => $group_name) {
+
+		if($default_root_accounts == 'none') return;
+
+		if($default_root_accounts == 'default') {
+			if(!isset($config['defaults']['account_groups'])) return;
+
+			foreach($config['defaults']['account_groups'] as $account_name => $group_name) {
+				$account = new ServerAccount;
+				$account->name = $account_name;
+				$this->add_account($account);
+
+				try {
+					$group = $group_dir->get_group_by_name($group_name);
+				} catch(GroupNotFoundException $e) {
+					$group = new Group;
+					$group->name = $group_name;
+					$group->system = 1;
+					$group_dir->add_group($group);
+				}
+				// Enforce privilege, so that a non-admin can add the default accounts
+				// to the relevant groups.
+				$group->add_member($account, null, true);
+			}
+		}
+
+		else {
 			$account = new ServerAccount;
-			$account->name = $account_name;
+			$account->name = $default_root_accounts;
 			$this->add_account($account);
+
+			if(!isset($config['defaults']['account_groups'])) return;
+
+			$default_groups = $config['defaults']['account_groups'];
+			reset($default_groups);
+			$first_group_name = key($default_groups) ?: '';
+
 			try {
-				$group = $group_dir->get_group_by_name($group_name);
+				$group = $group_dir->get_group_by_name($first_group_name);
 			} catch(GroupNotFoundException $e) {
 				$group = new Group;
-				$group->name = $group_name;
+				$group->name = $first_group_name;
 				$group->system = 1;
 				$group_dir->add_group($group);
 			}

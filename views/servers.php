@@ -196,8 +196,18 @@ if(isset($_POST['add_server'])) {
 			$server->key_scan = default_key_scan_setting();
 			$server->jumphosts = $_POST['jumphosts'];
 			$server->keys_sync_user = $_POST['keys_sync_user'];
+			$root_account_setting = $_POST['default_root_account'];
+			if($root_account_setting == 'use_custom_server_account') {
+				$default_root_account = $_POST['custom_server_account'];
+			}
+			elseif($root_account_setting == 'no_accounts') {
+				$default_root_account = 'none';
+			}
+			else {
+				$default_root_account = 'default';
+			}
 			try {
-				$server_dir->add_server($server);
+				$server_dir->add_server($server, $default_root_account);
 				foreach($admins as $admin) {
 					$server->add_admin($admin);
 				}

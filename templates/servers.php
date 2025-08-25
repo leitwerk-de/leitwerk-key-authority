@@ -218,6 +218,30 @@
 				<label for="keys_sync_user">User for keys-sync</label>
 				<input type="text" id="keys_sync_user" name="keys_sync_user" class="form-control" value="keys-sync" required>
 			</div>
+			<div class="form-group">
+			<label for="default_root_account">Default account creation</label>
+			<div>
+				<div class="radio">
+					<label>
+						<input type="radio" id="default_accounts_group" name="default_root_account" value="default_accounts_group">
+						Create standard accounts (config default: 'root' added to 'root-accounts' group)
+					</label>
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" id="use_custom_server_account" name="default_root_account" value="use_custom_server_account">
+						Create custom server account:
+					</label>
+					<input type="text" id="custom_server_account" name="custom_server_account" value="root" required>
+				</div>
+				<div class="radio">
+					<label>
+						<input type="radio" id="no_accounts" name="default_root_account" value="no_accounts">
+						Do not create standard server accounts
+					</label>
+				</div>
+				</div>
+			</div>
 			<button type="submit" name="add_server" value="1" class="btn btn-primary">Add server to key management</button>
 		</form>
 	</div>
