@@ -325,7 +325,7 @@ class Server extends Record {
 
 			$default_groups = $config['defaults']['account_groups'];
 			reset($default_groups);
-			$first_group_name = key($default_groups) ?: '';
+			$first_group_name = current($default_groups) ?: '';
 
 			try {
 				$group = $group_dir->get_group_by_name($first_group_name);
