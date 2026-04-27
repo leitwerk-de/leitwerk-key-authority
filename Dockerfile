@@ -40,7 +40,8 @@ RUN echo "* * * * * lka cd /var/www/lka && php scripts/ldap_update.php >> /var/l
     && echo "* * * * * lka cd /var/www/lka && scripts/keys-sync-service.sh >> /var/log/cron.log 2>&1" >> /etc/cron.d/lka-cron \
     && chmod 0644 /etc/cron.d/lka-cron \
     && crontab /etc/cron.d/lka-cron \
-    && touch /var/log/cron.log && chown lka:lka /var/log/cron.log
+    && touch /var/log/cron.log && chown lka:lka /var/log/cron.log \
+    && touch /var/log/keys-sync.log && chown lka:lka /var/log/keys-sync.log
 
 COPY docker/startup.sh /
 RUN chmod +x /startup.sh
