@@ -3,5 +3,5 @@ config/keys-sync
 config/keys-sync.pub
 config/*.save
 extensions/*.php
-
+.env
 /vendor/

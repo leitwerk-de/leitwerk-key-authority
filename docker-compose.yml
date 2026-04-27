@@ -1,0 +1,22 @@
+services:
+  lka-app:
+    build: .
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - lka-db
+    volumes:
+      - ./config:/var/www/lka/config
+      - .docker/sites:/etc/apache2/sites-enabled
+
+  lka-db:
+    image: mysql:8.0
+    container_name: lka-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+volumes:
+  mysql_data:
