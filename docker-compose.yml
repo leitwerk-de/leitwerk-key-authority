@@ -10,15 +10,19 @@ services:
       - lka-db
     volumes:
       - ./config:/var/www/lka/config
-      - ./sites:/etc/apache2/sites-available
+      - ./docker/sites:/etc/apache2/sites-available
+      - ./docker/certs:/etc/apache2/certs
 
   lka-db:
-    image: mysql:8.0
+    image: mariadb:10.11
     container_name: lka-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MARIADB_ROOT_PASSWORD : ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mariadb_data:/var/lib/mysql
 volumes:
-  mysql_data:
+  mariadb_data:
