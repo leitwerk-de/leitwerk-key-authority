@@ -28,7 +28,7 @@ RUN mkdir -p $APACHE_RUN_DIR $APACHE_LOCK_DIR $APACHE_LOG_DIR \
     && chown -R www-data:www-data $APACHE_RUN_DIR $APACHE_LOCK_DIR $APACHE_LOG_DIR \
     && sed -i "s|\${APACHE_RUN_DIR}|$APACHE_RUN_DIR|g; s|\${APACHE_PID_FILE}|$APACHE_PID_FILE|g; s|\${APACHE_LOCK_DIR}|$APACHE_LOCK_DIR|g" /etc/apache2/apache2.conf
 
-RUN a2enmod authnz_ldap rewrite
+RUN a2enmod authnz_ldap rewrite ssl
 
 COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 USER lka
