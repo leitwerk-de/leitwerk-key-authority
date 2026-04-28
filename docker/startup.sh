@@ -12,7 +12,7 @@ fi
 KEYS=$CONFIG_DIR/keys-sync
 
 if [ ! -f $KEYS ]; then
-    ssh-keygen -b 4096 -m PEM -f '$KEYS' -N '' -q
+    ssh-keygen -b 4096 -m PEM -f $KEYS -N '' -q
 fi
 
 chown -R lka:lka $CONFIG_DIR

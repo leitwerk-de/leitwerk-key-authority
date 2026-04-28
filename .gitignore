@@ -4,6 +4,7 @@ config/keys-sync.pub
 config/*.save
 extensions/*.php
 docker/sites/*
+docker/certs/*
 !docker/sites/000-default-sample.conf
 .env
 /vendor/
