@@ -8,10 +8,14 @@ php8.4-mysql \
 php8.4-mbstring \
 php8.4-gmp \
 php8.4-zip \
+openssl ca-certificates\
 git \
 cron \
 openssh-client \
 && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+COPY docker/ca-certs/ /usr/local/share/ca-certificates/
+RUN update-ca-certificates
 
 RUN adduser --uid 1000 --shell /bin/bash lka
 
@@ -37,7 +41,6 @@ USER root
 
 RUN echo "* * * * * lka cd /var/www/lka && php scripts/ldap_update.php >> /var/log/cron.log 2>&1" >> /etc/cron.d/lka-cron \
     && echo "* * * * * lka cd /var/www/lka && php scripts/supervise_external_keys.php >> /var/log/cron.log 2>&1" >> /etc/cron.d/lka-cron \
-    && echo "* * * * * lka cd /var/www/lka && scripts/keys-sync-service.sh >> /var/log/cron.log 2>&1" >> /etc/cron.d/lka-cron \
     && chmod 0644 /etc/cron.d/lka-cron \
     && crontab /etc/cron.d/lka-cron \
     && touch /var/log/cron.log && chown lka:lka /var/log/cron.log \
