@@ -115,7 +115,7 @@ class Group extends Entity {
 	* @param User $actor The user who performs this action. In case of null, $this->active_user is assumed.
 	* @param bool $enforce_privilege Do not fail if privileges are missing. Uses for example while adding a new host.
 	*/
-	public function add_member(Entity $entity, User $actor = null, bool $enforce_privilege = false) {
+	public function add_member(Entity $entity, ?User $actor = null, bool $enforce_privilege = false) {
 		if(is_null($this->entity_id)) throw new BadMethodCallException('Group must be in directory before members can be added');
 		if(is_null($entity->entity_id)) throw new InvalidArgumentException('Entity must be in directory before it can be added to a group');
 		$entity_id = $entity->entity_id;

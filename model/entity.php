@@ -63,7 +63,7 @@ abstract class Entity extends Record {
 	* @param int $level syslog priority as defined in http://php.net/manual/en/function.syslog.php
 	* @param User $actor The user who performs the logged action. In case of null, $this->active_user is assumed.
 	*/
-	public function log($details, $level = LOG_INFO, User $actor = null) {
+	public function log($details, $level = LOG_INFO, ?User $actor = null) {
 		if(is_null($this->id)) throw new BadMethodCallException('Entity must be in directory before log entries can be added');
 		if ($actor === null) {
 			$actor = $this->active_user;
