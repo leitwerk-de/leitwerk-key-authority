@@ -8,7 +8,7 @@ php8.4-mysql \
 php8.4-mbstring \
 php8.4-gmp \
 php8.4-zip \
-openssl ca-certificates\
+openssl ca-certificates \
 git \
 cron \
 openssh-client \
@@ -23,14 +23,16 @@ COPY . /var/www/lka
 RUN chown -R lka:lka /var/www/lka
 WORKDIR /var/www/lka
 
-ENV APACHE_RUN_DIR=/var/run/apache2 \
+ENV APACHE_RUN_USER=lka \
+    APACHE_RUN_GROUP=lka \
+    APACHE_RUN_DIR=/var/run/apache2 \
     APACHE_PID_FILE=/var/run/apache2/apache2.pid \
     APACHE_LOCK_DIR=/var/lock/apache2 \
     APACHE_LOG_DIR=/var/log/apache2
 
 RUN mkdir -p $APACHE_RUN_DIR $APACHE_LOCK_DIR $APACHE_LOG_DIR \
-    && chown -R www-data:www-data $APACHE_RUN_DIR $APACHE_LOCK_DIR $APACHE_LOG_DIR \
-    && sed -i "s|\${APACHE_RUN_DIR}|$APACHE_RUN_DIR|g; s|\${APACHE_PID_FILE}|$APACHE_PID_FILE|g; s|\${APACHE_LOCK_DIR}|$APACHE_LOCK_DIR|g" /etc/apache2/apache2.conf
+    && chown -R lka:lka $APACHE_RUN_DIR $APACHE_LOCK_DIR $APACHE_LOG_DIR \
+    && sed -i "s|\${APACHE_RUN_DIR}|$APACHE_RUN_DIR|g; s|\${APACHE_PID_FILE}|$APACHE_PID_FILE|g; s|\${APACHE_LOCK_DIR}|$APACHE_LOCK_DIR|g; s|^export APACHE_RUN_USER=.*|export APACHE_RUN_USER=lka|; s|^export APACHE_RUN_GROUP=.*|export APACHE_RUN_GROUP=lka|" /etc/apache2/envvars
 
 RUN a2enmod authnz_ldap rewrite ssl
 
