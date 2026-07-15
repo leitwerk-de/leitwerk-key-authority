@@ -51,7 +51,7 @@ if(isset($router->vars['format']) && $router->vars['format'] == 'json') {
 	header('Content-type: text/plain; charset=utf-8');
 	echo $page->generate();
 } else {
-	if (isset($_POST['allow'])) {
+	if (isset($_POST['allow']) && $active_user->admin) {
 		$id = (int)$_POST['allow'];
 		$key = ExternalKey::get_by_id($id);
 		if ($key != null) {
@@ -59,7 +59,7 @@ if(isset($router->vars['format']) && $router->vars['format'] == 'json') {
 			send_mail_key_allowed($key);
 			$key->update();
 		}
-	} elseif (isset($_POST['deny'])) {
+	} elseif (isset($_POST['deny']) && $active_user->admin) {
 		$id = (int)$_POST['deny'];
 		$key = ExternalKey::get_by_id($id);
 		if ($key != null) {

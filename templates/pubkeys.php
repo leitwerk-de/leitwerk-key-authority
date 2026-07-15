@@ -177,7 +177,7 @@ function show_key(ExternalKey $key, array $buttons, string $relative_request_url
 			?><p>There are currently no new, unknown keys.</p><?php
 		} else {
 			foreach ($this->get('new_keys') as $newkey) {
-				show_key($newkey, ['allow', 'deny'], $this->data->relative_request_url, $this->get('active_user')->get_csrf_field());
+				show_key($newkey, $this->get('admin') ? ['allow', 'deny'] : [], $this->data->relative_request_url, $this->get('active_user')->get_csrf_field());
 			}
 		}
 		?>
@@ -201,7 +201,7 @@ function show_key(ExternalKey $key, array $buttons, string $relative_request_url
 			?><p>There are currently no explicitly allowed keys.</p><?php
 		} else {
 			foreach ($this->get('allowed_keys') as $newkey) {
-				show_key($newkey, ['deny'], $this->data->relative_request_url, $this->get('active_user')->get_csrf_field());
+				show_key($newkey, $this->get('admin') ? ['deny'] : [], $this->data->relative_request_url, $this->get('active_user')->get_csrf_field());
 			}
 		}
 		?>
@@ -213,7 +213,7 @@ function show_key(ExternalKey $key, array $buttons, string $relative_request_url
 			?><p>There are currently no explicitly denied keys.</p><?php
 		} else {
 			foreach ($this->get('denied_keys') as $newkey) {
-				show_key($newkey, ['allow'], $this->data->relative_request_url, $this->get('active_user')->get_csrf_field());
+				show_key($newkey, $this->get('admin') ? ['allow'] : [], $this->data->relative_request_url, $this->get('active_user')->get_csrf_field());
 			}
 		}
 		?>
