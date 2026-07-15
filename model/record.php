@@ -132,7 +132,7 @@ abstract class Record {
 		$values = array();
 		$types = '';
 		foreach($row as $field => $value) {
-			if(array_key_exists($field, $this->data) && $this->data[$field] != $value) {
+			if(array_key_exists($field, $this->data) && (is_null($this->data[$field]) !== is_null($value) || (string)$this->data[$field] !== (string)$value)) {
 				$update = new StdClass;
 				$update->field = $field;
 				$update->old_value = $value;
