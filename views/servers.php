@@ -38,7 +38,7 @@ function prepare_import(string $csv_document, &$error_ref): ?array {
 		}
 		$cells = str_getcsv($line, ",", "\"", "");
 		$count = count($cells);
-		if ($count != 4 or $count != 5) {
+		if ($count != 4 && $count != 5) {
 			$errors .= "- Line $line_num contains $count columns, but expected 4 or 5\n";
 			continue;
 		}
