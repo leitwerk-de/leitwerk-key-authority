@@ -89,7 +89,7 @@ abstract class Entity extends Record {
 
 		$text = "KeysScope=\"{$scope}\" KeysRequester=\"{$actor->uid}\"";
 		foreach($details as $key => $value) {
-			$text .= ' Keys'.ucfirst($key).'="'.str_replace('"', '', $value).'"';
+			$text .= ' Keys'.ucfirst($key).'="'.str_replace('"', '', preg_replace('/[\x00-\x1F\x7F]/', '', $value)).'"';
 		}
 		openlog('keys', LOG_ODELAY, LOG_AUTH);
 		syslog($level, $text);
