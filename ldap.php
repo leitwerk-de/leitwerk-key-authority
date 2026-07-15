@@ -142,10 +142,10 @@ class LDAP {
 	}
 
 	public static function escape($str = '') {
-		$metaChars = array("\\00", "\\", "(", ")", "*");
+		$metaChars = array("\0", "\\", "(", ")", "*");
 		$quotedMetaChars = array();
 		foreach($metaChars as $key => $value) {
-			$quotedMetaChars[$key] = '\\'. dechex(ord($value));
+			$quotedMetaChars[$key] = '\\'. str_pad(dechex(ord($value)), 2, '0', STR_PAD_LEFT);
 		}
 		$str = str_replace($metaChars, $quotedMetaChars, $str);
 		return $str;
