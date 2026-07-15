@@ -203,7 +203,7 @@ if(isset($_POST['sync'])) {
 	$note = $server->get_note_by_id($_POST['delete_note']);
 	$server->delete_note($note);
 	redirect('#notes');
-} elseif(isset($_POST['send_mail']) && !empty($_POST['subject']) && !empty($_POST['body']) && !empty($_POST['recipients'])) {
+} elseif(isset($_POST['send_mail']) && !empty($_POST['subject']) && !empty($_POST['body']) && !empty($_POST['recipients']) && ($server_admin || $active_user->admin)) {
 	$email = new Email;
 	$email->subject = $_POST['subject'];
 	$email->body = $_POST['body'];
