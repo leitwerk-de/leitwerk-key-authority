@@ -120,7 +120,7 @@ if(isset($_POST['add_group']) && ($active_user->admin)) {
 	}
 
 	redirect('#add');
-} else if (isset($_GET['get_ldap_groups'])) {
+} else if (isset($_GET['get_ldap_groups']) && $active_user->admin) {
 	$guid = $_GET['guid'];
 	$return_list = [];
 	if ($guid == "null") {
