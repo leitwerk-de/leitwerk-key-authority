@@ -62,7 +62,7 @@ class User extends Entity {
 				break;
 			case 'csrf_token':
 			case 'superior_entity_id':
-				return;
+				continue 2;
 			}
 			$this->log(array('action' => 'Setting update', 'value' => $change->new_value, 'oldvalue' => $change->old_value, 'field' => ucfirst(str_replace('_', ' ', $change->field))), $loglevel);
 		}
@@ -335,6 +335,9 @@ class User extends Entity {
 				}
 			} else {
 				$this->active = 1;
+			}
+			if($this->force_disable) {
+				$this->active = 0;
 			}
 			$this->admin = 0;
 			$group_member = $ldapuser[strtolower($config['ldap']['group_member_value'])];
