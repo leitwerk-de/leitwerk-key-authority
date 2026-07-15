@@ -49,6 +49,10 @@ if(isset($router->vars['hostname'])) {
 	try {
 		$group = $group_dir->get_group_by_name($router->vars['group']);
 		$group_admin = $active_user->admin_of($group);
+		if(!$group_admin && !$active_user->admin) {
+			require('views/error403.php');
+			die;
+		}
 		$access = $group->get_access_by_id($router->vars['access']);
 		$entity = $group;
 	} catch(GroupNotFoundException $e) {
