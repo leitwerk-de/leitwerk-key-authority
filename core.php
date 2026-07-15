@@ -66,7 +66,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 // Setup database connection and models
 function setup_database() {
-	global $config, $database, $driver, $pubkey_dir, $user_dir, $group_dir, $server_dir, $server_account_dir, $event_dir, $sync_request_dir;
+	global $config, $database, $driver, $migration_dir, $pubkey_dir, $user_dir, $group_dir, $server_dir, $server_account_dir, $event_dir, $sync_request_dir;
 	try {
 		$database = new mysqli($config['database']['hostname'], $config['database']['username'], $config['database']['password'], $config['database']['database'], $config['database']['port']);
 	} catch(ErrorException $e) {
@@ -115,7 +115,7 @@ define('ESC_NONE', 9);
 * @param integer $escaping method of escaping to use
 */
 function out($string, $escaping = ESC_HTML) {
-	if (is_null($string)) return '';
+	if(is_null($string)) return '';
 	switch($escaping) {
 	case ESC_HTML:
 		echo htmlspecialchars($string);
@@ -158,8 +158,7 @@ function outurl($url) {
  * @return string HTML-escaped string
  */
 function hesc($string) {
-	if (is_null($string)) return '';
-	return htmlspecialchars($string);
+	return htmlspecialchars($string ?? '');
 }
 
 function english_list($array) {

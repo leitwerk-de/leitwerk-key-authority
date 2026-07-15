@@ -23,7 +23,7 @@
 </dl>
 <ul class="nav nav-tabs">
 	<li><a href="#details" data-toggle="tab">Details</a></li>
-	<?php if($this->get('user')->auth_realm == 'LDAP') { ?>
+	<?php if($this->get('user')->auth_realm == 'LDAP' && $this->get('admin')) { ?>
 	<li><a href="#settings" data-toggle="tab">Settings</a></li>
 	<?php } ?>
 </ul>
@@ -236,7 +236,7 @@
 		<?php } ?>
 		<?php } ?>
 	</div>
-	<?php if($this->get('user')->auth_realm == 'LDAP') { ?>
+	<?php if($this->get('user')->auth_realm == 'LDAP' && $this->get('admin')) { ?>
 	<div class="tab-pane fade" id="settings">
 		<h2 class="sr-only">Settings</h2>
 		<form method="post" action="<?php outurl($this->data->relative_request_url)?>" class="form-horizontal">

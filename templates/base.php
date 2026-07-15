@@ -72,6 +72,6 @@ $footer=str_replace("%v", "1.2.2", $web_config['footer']);
 		<?php } ?>
 	</div>
 </div>
-<script src="<?php outurl('/jquery/jquery-3.2.1.min.js')?>"></script>
+<script src="<?php outurl('/jquery/jquery-3.7.1.min.js')?>"></script>
 <script src="<?php outurl('/bootstrap/js/bootstrap.min.js')?>"></script>
 <script src="<?php outurl('/extra.js?'.filemtime('public_html/extra.js'))?>"></script>

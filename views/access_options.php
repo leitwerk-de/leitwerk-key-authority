@@ -68,6 +68,10 @@ if(isset($router->vars['hostname'])) {
 }
 if(isset($_POST['update_access'])) {
 	$options = array();
+	if (isset($group) && !$active_user->admin && !$group_admin) { // not really needed, just future-proofing
+		require('views/error403.php');
+		die;
+	}
 	if(isset($_POST['access_option'])) {
 		foreach($_POST['access_option'] as $k => $v) {
 			if($v['enabled']) {
