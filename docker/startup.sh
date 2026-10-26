@@ -24,6 +24,6 @@ su lka -c "cd /var/www/lka && nohup php /var/www/lka/scripts/syncd.php --systemd
 
 source /etc/apache2/envvars
 
-a2ensite 000-default && service apache2 reload
+a2ensite 000-default
 
 exec apache2 -DFOREGROUND
